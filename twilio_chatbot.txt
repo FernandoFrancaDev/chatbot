@@ -1,0 +1,1353 @@
+{
+  "description": "A New Flow",
+  "states": [
+    {
+      "name": "Trigger",
+      "type": "trigger",
+      "transitions": [
+        {
+          "next": "apresentacao",
+          "event": "incomingMessage"
+        },
+        {
+          "event": "incomingCall"
+        },
+        {
+          "event": "incomingConversationMessage"
+        },
+        {
+          "event": "incomingRequest"
+        },
+        {
+          "event": "incomingParent"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 0,
+          "y": -70
+        }
+      }
+    },
+    {
+      "name": "apresentacao",
+      "type": "send-and-wait-for-reply",
+      "transitions": [
+        {
+          "next": "opcao_apresentacao",
+          "event": "incomingMessage"
+        },
+        {
+          "next": "ausencia_resposta",
+          "event": "timeout"
+        },
+        {
+          "event": "deliveryFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 220,
+          "y": 190
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "body": "Olá obrigado por contatar a Notebook Services, escolha uma das opções a seguir e envie o numero referente a essa escolha.\n1 - Fazer orçamento\n2 - Visualizar portifólio e projetos",
+        "timeout": "1000"
+      }
+    },
+    {
+      "name": "opcao_apresentacao",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "incorreta_apresentacao",
+          "event": "noMatch"
+        },
+        {
+          "next": "orcamento",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "1",
+              "arguments": [
+                "{{widgets.apresentacao.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "1, 1-, 1., one, um, orcamento, fazer orcamento,"
+            }
+          ]
+        },
+        {
+          "next": "portifolio",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "2",
+              "arguments": [
+                "{{widgets.apresentacao.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "2, 2-, 2., dois, two, projeto, portifolio"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.apresentacao.inbound.Body}}",
+        "offset": {
+          "x": 200,
+          "y": 410
+        }
+      }
+    },
+    {
+      "name": "portifolio",
+      "type": "send-and-wait-for-reply",
+      "transitions": [
+        {
+          "next": "opcoes_portifolio",
+          "event": "incomingMessage"
+        },
+        {
+          "next": "ausencia_resposta",
+          "event": "timeout"
+        },
+        {
+          "event": "deliveryFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 1040,
+          "y": 370
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "body": "Fico feliz que queira conhecer o meu trabalho!\n\neste link contém grande parte dos meus trabalhos realizados\nhttps://github.com/FernandoFrancaDev\nCaso queira fazer um orçamento digite:\n1 - Fazer orçamento\n2 - Não quero fazer orçamento",
+        "timeout": "1000"
+      }
+    },
+    {
+      "name": "opcoes_portifolio",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "nao_orcar",
+          "event": "noMatch"
+        },
+        {
+          "next": "orcamento",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "sim",
+              "arguments": [
+                "{{widgets.portifolio.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "sim, yes, s, Sim, y, 1, um"
+            }
+          ]
+        },
+        {
+          "next": "nao_orcar",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "não",
+              "arguments": [
+                "{{widgets.portifolio.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "2, 2-, 2., dois, two"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.portifolio.inbound.Body}}",
+        "offset": {
+          "x": 1040,
+          "y": 620
+        }
+      }
+    },
+    {
+      "name": "nao_orcar",
+      "type": "send-message",
+      "transitions": [
+        {
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 1050,
+          "y": 890
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "Sem problemas!\n\nAgradeço muito por ter entrado em contato com a Notebook Serviçes e ficamos a disposição caso queira conversar novamente"
+      }
+    },
+    {
+      "name": "orcamento",
+      "type": "send-and-wait-for-reply",
+      "transitions": [
+        {
+          "next": "opcoes_orcamento",
+          "event": "incomingMessage"
+        },
+        {
+          "next": "ausencia_resposta",
+          "event": "timeout"
+        },
+        {
+          "event": "deliveryFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -610,
+          "y": 370
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "body": "Que legal que você quer fazer um orçamento. \n\nNos conte um pouco mais sobre o tipo de orçamento que deseja fazer\n\n1 - Comprar um notebook novo\n2 - Comprar um notebook usado\n3 - Fazer manutenção no notebook",
+        "timeout": "1000"
+      }
+    },
+    {
+      "name": "opcoes_orcamento",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "incorreta_notebook",
+          "event": "noMatch"
+        },
+        {
+          "next": "notebook_novo",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "1",
+              "arguments": [
+                "{{widgets.orcamento.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "1, 1-, 1., one, um, comprar"
+            }
+          ]
+        },
+        {
+          "next": "notebook_usado",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "2",
+              "arguments": [
+                "{{widgets.orcamento.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "2, 2-, 2., dois, two, usado, comprar notebook usado"
+            }
+          ]
+        },
+        {
+          "next": "manutencao_notebook",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "3",
+              "arguments": [
+                "{{widgets.orcamento.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "3, 3-, 3., tres, três, manuteção, fazer manutenção"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.orcamento.inbound.Body}}",
+        "offset": {
+          "x": -610,
+          "y": 580
+        }
+      }
+    },
+    {
+      "name": "notebook_novo",
+      "type": "send-and-wait-for-reply",
+      "transitions": [
+        {
+          "next": "opcao_novo",
+          "event": "incomingMessage"
+        },
+        {
+          "next": "ausencia_resposta",
+          "event": "timeout"
+        },
+        {
+          "event": "deliveryFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -610,
+          "y": 1070
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "body": "Comprar um notebook novo pode mudar o seu negócio de forma positiva, nos conte um pouco mais sobre onde utilizará seu notebook para que possamos definir a melhor opção para você\n\n1 - Será um notebook para escritório(usar para textos e planilhas)\n2 - Será um notebook para uso domestico(usar para redes sociais)\n3 - Será um notebook desenvolvimento se softwares\n4 - Será um notebook para uso em design gráfico, filmes e edição\n5 - Será para gamer",
+        "timeout": "1000"
+      }
+    },
+    {
+      "name": "notebook_usado",
+      "type": "send-and-wait-for-reply",
+      "transitions": [
+        {
+          "next": "opcao_usado",
+          "event": "incomingMessage"
+        },
+        {
+          "next": "ausencia_resposta",
+          "event": "timeout"
+        },
+        {
+          "event": "deliveryFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -250,
+          "y": 1090
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "body": "Temos ótimas opções de notebbok usados de clientes que fizeram up-grade de suas maquinas. escolha uma opção para a compra do notebook usaso.\n\n1 - Notebook de ótimo desenpenho\n2 - Notebook simples",
+        "timeout": "1000"
+      }
+    },
+    {
+      "name": "manutencao_notebook",
+      "type": "send-and-wait-for-reply",
+      "transitions": [
+        {
+          "next": "opcao_manutencao",
+          "event": "incomingMessage"
+        },
+        {
+          "next": "ausencia_resposta",
+          "event": "timeout"
+        },
+        {
+          "event": "deliveryFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 160,
+          "y": 1100
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "body": "Manuteção de notebook. Nos conte o que está acontecendo com o seu equipamento.\n1 - Notebook não liga\n2 - Notebook lento\n3 - Notebook reinicia sem ação do usuário\n4 - Notebook não acessa a internet\n5 - Notebook sem som",
+        "timeout": "1000"
+      }
+    },
+    {
+      "name": "opcao_novo",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "incorreta_opcao_novo",
+          "event": "noMatch"
+        },
+        {
+          "next": "escritorio",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "1",
+              "arguments": [
+                "{{widgets.notebook_novo.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "1, 1-, 1., one, um, escritório"
+            }
+          ]
+        },
+        {
+          "next": "domestico",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "2",
+              "arguments": [
+                "{{widgets.notebook_novo.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "2, 2-, 2., dois, two, domestico, doméstico"
+            }
+          ]
+        },
+        {
+          "next": "desnvolvedor",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "3",
+              "arguments": [
+                "{{widgets.notebook_novo.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "3, 3-, 3., tres, três, desenvolvimento"
+            }
+          ]
+        },
+        {
+          "next": "design_grafico",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "4",
+              "arguments": [
+                "{{widgets.notebook_novo.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "4, 4-, 4., quatro, design gráfico"
+            }
+          ]
+        },
+        {
+          "next": "gamer",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "5",
+              "arguments": [
+                "{{widgets.notebook_novo.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "5, 5-, 5., cinco, gamer, games"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.notebook_novo.inbound.Body}}",
+        "offset": {
+          "x": -640,
+          "y": 1290
+        }
+      }
+    },
+    {
+      "name": "escritorio",
+      "type": "send-message",
+      "transitions": [
+        {
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -630,
+          "y": 1520
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "ThinkPad X1 Carbon (14\" Intel)\nDesempenho e mobilidade premium\nO ThinkPad X1 Carbon 8ª Geração com certificação Intel® Athena (alguns modelos), oferece desempenho em mobilidade com bateria de longa duração, melhor conectividade da categoria e tecnologia de carregamento rápido. Além disso, você desfrutará de opções avançadas de segurança, áudio aprimorado e tela incrível. Este tradicional notebook combina detalhes requintados com durabilidade para criar o melhor em desempenho premium.A partir de:R$ 5.399,99"
+      }
+    },
+    {
+      "name": "domestico",
+      "type": "send-message",
+      "transitions": [
+        {
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -630,
+          "y": 1690
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "Notebook IdeaPad 1 (15\" AMD)\n\nO estilo encontra a eficiência\nExplore e conecte-se onde quer que a vida o leve com o notavelmente fino notebook IdeaPad 1 Gen 7 (15″ AMD). Ele inicializa em segundos com Flip to Start, que exige apenas que você abra a tampa para ligar e é impulsionado por processadores AMD Ryzen™ ultraeficientes que permitem realizar várias tarefas com facilidade.A partir de:R$ 1.979,99"
+      }
+    },
+    {
+      "name": "desnvolvedor",
+      "type": "send-message",
+      "transitions": [
+        {
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -630,
+          "y": 1870
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "ThinkPad P15 (15”)4.6(633)\nNotebook Workstation econômico de 15,6\"\nCertificado ISV\nDurável, seguro, elegante e personalizável\nA partir de\nR$ 10.349,99"
+      }
+    },
+    {
+      "name": "design_grafico",
+      "type": "send-message",
+      "transitions": [
+        {
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -630,
+          "y": 2050
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "ThinkPad T14 (14'' Intel)4.4(98)\nPortátil profissional de 14\" (35,56 cm) com tecnologia Intel® vPro®\nBateria para todo o dia e excelente conectividade com Intel® WiFi 6E opcional\nCâmaras Web Full HD opcionais e ecrãs com certificação de emissões de luz azul de baixa intensidade\nA partir de\nR$ 8.009,99"
+      }
+    },
+    {
+      "name": "gamer",
+      "type": "send-message",
+      "transitions": [
+        {
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -630,
+          "y": 2240
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "Notebook Gamer Legion Slim 7(16″ AMD)4.3(15)4.3 de 5 estrelas. 15 avaliações\nProcessadores móveis AMD Ryzen™, que trazem potência vigorosa\nPlaca de vídeo AMD Radeon™ RX série 6000S para jogadores experientes\nVeja todos os detalhes em uma brilhante tela WQXGA de 16″\nA partir de\nR$ 13.139,99"
+      }
+    },
+    {
+      "name": "opcao_usado",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "incorreta_opcao_usado",
+          "event": "noMatch"
+        },
+        {
+          "next": "potente",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "1",
+              "arguments": [
+                "{{widgets.notebook_usado.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "1, ótimo desempenho, ótimo"
+            }
+          ]
+        },
+        {
+          "next": "simples",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "2",
+              "arguments": [
+                "{{widgets.notebook_usado.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "2, simples"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.notebook_usado.inbound.Body}}",
+        "offset": {
+          "x": -260,
+          "y": 1300
+        }
+      }
+    },
+    {
+      "name": "potente",
+      "type": "send-message",
+      "transitions": [
+        {
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -260,
+          "y": 2010
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "Notebook Hp Core I5 8gb 256gb Ssd Tela 14 Full Hd Windows 10\nFavorito1690 reaisR$1.690"
+      }
+    },
+    {
+      "name": "simples",
+      "type": "send-message",
+      "transitions": [
+        {
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -280,
+          "y": 2220
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "Notebook Lenovo 100E-81M8S01500 - Intel Celeron N4020 - RAM 4GB - HD 64GB eMMC 5.1 - Tela 11.6” - Windows 10\n100E-81M8S01500\nde: R$2.159,00-56%\npor: R$911,05\nÀ vista no PIX com 5% OFF\nR$959,00 ou 6X de R$159,83 sem juros"
+      }
+    },
+    {
+      "name": "opcao_manutencao",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "incorreta_opcao_manutencao",
+          "event": "noMatch"
+        },
+        {
+          "next": "nao_liga",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "1",
+              "arguments": [
+                "{{widgets.manutencao_notebook.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "1, 1-, 1., one, um, não liga, nao liga"
+            }
+          ]
+        },
+        {
+          "next": "lento",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "2",
+              "arguments": [
+                "{{widgets.manutencao_notebook.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "2, lento"
+            }
+          ]
+        },
+        {
+          "next": "reinicia",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "3",
+              "arguments": [
+                "{{widgets.manutencao_notebook.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "3, reinicia"
+            }
+          ]
+        },
+        {
+          "next": "internet",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "4",
+              "arguments": [
+                "{{widgets.manutencao_notebook.inbound.Body}}"
+              ],
+              "type": "equal_to",
+              "value": "4, internet"
+            }
+          ]
+        },
+        {
+          "next": "som",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "5",
+              "arguments": [
+                "{{widgets.manutencao_notebook.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "5, som"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.manutencao_notebook.inbound.Body}}",
+        "offset": {
+          "x": 160,
+          "y": 1290
+        }
+      }
+    },
+    {
+      "name": "nao_liga",
+      "type": "send-message",
+      "transitions": [
+        {
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 180,
+          "y": 1490
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "1 - Notebook não liga! Pode estar relacionado a peças como processador, memória e placa de vídeo, traga na nossa unidade para fazermos um orçamento sem compromisso."
+      }
+    },
+    {
+      "name": "lento",
+      "type": "send-message",
+      "transitions": [
+        {
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 180,
+          "y": 1660
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "2 - Notebook lento! Pode estar relacionado com falta de memória, espaço de HD ou vírus. É um caso urgente! Traga na nossa unidade para fazermos um orçamento sem compromisso."
+      }
+    },
+    {
+      "name": "reinicia",
+      "type": "send-message",
+      "transitions": [
+        {
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 170,
+          "y": 1850
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "3 - Notebook reinicia sem ação do usuário! Pode estar relacionado a vírus, software incompativel. É um caso urgente! Traga na nossa unidade para fazermos um orçamento sem compromisso."
+      }
+    },
+    {
+      "name": "internet",
+      "type": "send-message",
+      "transitions": [
+        {
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 190,
+          "y": 2050
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "4 - Notebook não acessa a internet! Pode estar relacionado a placa de rede, drive de rede ou a vírus. É um caso urgente! Traga na nossa unidade para fazermos um orçamento sem compromisso."
+      }
+    },
+    {
+      "name": "som",
+      "type": "send-message",
+      "transitions": [
+        {
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 170,
+          "y": 2240
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "5 - Notebook sem som! Pode estar relacionado a placa de som, drive de som ou vírus. É um caso urgente! Traga na nossa unidade para fazermos um orçamento sem compromisso."
+      }
+    },
+    {
+      "name": "ausencia_resposta",
+      "type": "send-message",
+      "transitions": [
+        {
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -610,
+          "y": 10
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "Imagino que deva estar ocupado(a) \nAssim que quiser conversar novamente para conhecer mais dos nossos produtos será um prazer."
+      }
+    },
+    {
+      "name": "incorreta_apresentacao",
+      "type": "send-and-wait-for-reply",
+      "transitions": [
+        {
+          "next": "opcoes_incorreta_apresentacao",
+          "event": "incomingMessage"
+        },
+        {
+          "event": "timeout"
+        },
+        {
+          "event": "deliveryFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 210,
+          "y": 590
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "body": "Não entendi direito o que você quiz dizer com isso, escolha uma das opções a seguir e envie o \"numero\" referente a essa escolha:\n \n1 - Fazer orçamento\n2 - Visualizar portifólio e projetos",
+        "timeout": "1000"
+      }
+    },
+    {
+      "name": "opcoes_incorreta_apresentacao",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "incorreta_apresentacao",
+          "event": "noMatch"
+        },
+        {
+          "next": "opcoes_orcamento",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "1",
+              "arguments": [
+                "{{widgets.incorreta_apresentacao.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "1, 1-, 1., one, um, orcamento, fazer orcamento,"
+            }
+          ]
+        },
+        {
+          "next": "portifolio",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "2",
+              "arguments": [
+                "{{widgets.incorreta_apresentacao.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "2, 2-, 2., dois, two, projeto, portifolio"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.incorreta_apresentacao.inbound.Body}}",
+        "offset": {
+          "x": 220,
+          "y": 780
+        }
+      }
+    },
+    {
+      "name": "incorreta_notebook",
+      "type": "send-and-wait-for-reply",
+      "transitions": [
+        {
+          "next": "opcoes_incorreta_notebook",
+          "event": "incomingMessage"
+        },
+        {
+          "event": "timeout"
+        },
+        {
+          "event": "deliveryFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -1020,
+          "y": 760
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "body": "Não entendi direito o que você quiz dizer com isso, escolha uma das opções a seguir e envie o \"numero\" referente a essa escolha:\n  \n1 - Comprar um notebook novo\n2 - Comprar um notebook usado\n3 - Fazer manutenção no notebook",
+        "timeout": "1000"
+      }
+    },
+    {
+      "name": "opcoes_incorreta_notebook",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "incorreta_notebook",
+          "event": "noMatch"
+        },
+        {
+          "next": "notebook_novo",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "1",
+              "arguments": [
+                "{{widgets.incorreta_notebook.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "1, 1-, 1., one, um, comprar, novo, notebook novo"
+            }
+          ]
+        },
+        {
+          "next": "notebook_usado",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "2",
+              "arguments": [
+                "{{widgets.incorreta_notebook.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "2, 2-, 2., dois, two, usado, comprar notebook usado"
+            }
+          ]
+        },
+        {
+          "next": "manutencao_notebook",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "3",
+              "arguments": [
+                "{{widgets.incorreta_notebook.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "3, 3-, 3., tres, três, manuteção, fazer manutenção"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.incorreta_notebook.inbound.Body}}",
+        "offset": {
+          "x": -1030,
+          "y": 990
+        }
+      }
+    },
+    {
+      "name": "incorreta_opcao_novo",
+      "type": "send-and-wait-for-reply",
+      "transitions": [
+        {
+          "next": "ajuste_incorreta_opcoes_novo",
+          "event": "incomingMessage"
+        },
+        {
+          "event": "timeout"
+        },
+        {
+          "event": "deliveryFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -1050,
+          "y": 1270
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "body": "Não entendi direito o que você quiz dizer com isso, escolha uma das opções a seguir e envie o \"numero\" referente a essa escolha:\n \n1 - Será um notebook para escritório(usar para textos e planilhas)\n2 - Será um notebook para uso domestico(usar para redes sociais)\n3 - Será um notebook desenvolvimento se softwares\n4 - Será um notebook para uso em design gráfico, filmes e edição\n5 - Será para gamer",
+        "timeout": "1000"
+      }
+    },
+    {
+      "name": "incorreta_opcao_usado",
+      "type": "send-and-wait-for-reply",
+      "transitions": [
+        {
+          "next": "ajuste_incorreta_opcao_usado",
+          "event": "incomingMessage"
+        },
+        {
+          "event": "timeout"
+        },
+        {
+          "event": "deliveryFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -260,
+          "y": 1490
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "body": "Não entendi direito o que você quiz dizer com isso, escolha uma das opções a seguir e envie o \"numero\" referente a essa escolha:\n \n1 - Notebook de ótimo desenpenho\n2 - Notebook simples",
+        "timeout": "1000"
+      }
+    },
+    {
+      "name": "incorreta_opcao_manutencao",
+      "type": "send-and-wait-for-reply",
+      "transitions": [
+        {
+          "next": "ajuste_incorreta_opcao_manutecao",
+          "event": "incomingMessage"
+        },
+        {
+          "event": "timeout"
+        },
+        {
+          "event": "deliveryFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 590,
+          "y": 1290
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "body": "Não entendi direito o que você quiz dizer com isso, escolha uma das opções a seguir e envie o \"numero\" referente a essa escolha:\n \n1 - Notebook não liga\n2 - Notebook lento\n3 - Notebook reinicia sem ação do usuário\n4 - Notebook não acessa a internet\n5 - Notebook sem som",
+        "timeout": "1000"
+      }
+    },
+    {
+      "name": "ajuste_incorreta_opcoes_novo",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "incorreta_opcao_novo",
+          "event": "noMatch"
+        },
+        {
+          "next": "escritorio",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "1",
+              "arguments": [
+                "{{widgets.incorreta_opcao_novo.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "1, 1-, 1., one, um, escritório"
+            }
+          ]
+        },
+        {
+          "next": "domestico",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "2",
+              "arguments": [
+                "{{widgets.incorreta_opcao_novo.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "2, 2-, 2., dois, two, domestico, doméstico"
+            }
+          ]
+        },
+        {
+          "next": "desnvolvedor",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "3",
+              "arguments": [
+                "{{widgets.incorreta_opcao_novo.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "3, 3-, 3., tres, três, desenvolvimento"
+            }
+          ]
+        },
+        {
+          "next": "design_grafico",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "4",
+              "arguments": [
+                "{{widgets.incorreta_opcao_novo.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "4, 4-, 4., quatro, design gráfico"
+            }
+          ]
+        },
+        {
+          "next": "gamer",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "5",
+              "arguments": [
+                "{{widgets.incorreta_opcao_novo.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "5, gamer, games"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.incorreta_opcao_novo.inbound.Body}}",
+        "offset": {
+          "x": -1050,
+          "y": 1480
+        }
+      }
+    },
+    {
+      "name": "ajuste_incorreta_opcao_usado",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "incorreta_opcao_usado",
+          "event": "noMatch"
+        },
+        {
+          "next": "potente",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "1",
+              "arguments": [
+                "{{widgets.incorreta_opcao_usado.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "1, ótimo desempenho, ótimo, potente"
+            }
+          ]
+        },
+        {
+          "next": "simples",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "2",
+              "arguments": [
+                "{{widgets.incorreta_opcao_usado.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "2, simples"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.incorreta_opcao_usado.inbound.Body}}",
+        "offset": {
+          "x": -270,
+          "y": 1680
+        }
+      }
+    },
+    {
+      "name": "ajuste_incorreta_opcao_manutecao",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "incorreta_opcao_manutencao",
+          "event": "noMatch"
+        },
+        {
+          "next": "nao_liga",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "1",
+              "arguments": [
+                "{{widgets.incorreta_opcao_manutencao.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "1, 1-, 1., one, um, não liga, nao liga"
+            }
+          ]
+        },
+        {
+          "next": "lento",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "2",
+              "arguments": [
+                "{{widgets.incorreta_opcao_manutencao.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "2, 2-, 2., dois, two, lento"
+            }
+          ]
+        },
+        {
+          "next": "reinicia",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "3",
+              "arguments": [
+                "{{widgets.incorreta_opcao_manutencao.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "3, 3-, 3., tres, três, reinicia"
+            }
+          ]
+        },
+        {
+          "next": "internet",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "4",
+              "arguments": [
+                "{{widgets.incorreta_opcao_manutencao.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "4, 4-, 4., quatro, sem internet"
+            }
+          ]
+        },
+        {
+          "next": "som",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "5",
+              "arguments": [
+                "{{widgets.incorreta_opcao_manutencao.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "5, 5-, 5., cinco, som, sem som"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.incorreta_opcao_manutencao.inbound.Body}}",
+        "offset": {
+          "x": 600,
+          "y": 1490
+        }
+      }
+    }
+  ],
+  "initial_state": "Trigger",
+  "flags": {
+    "allow_concurrent_calls": true
+  }
+}
