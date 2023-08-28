@@ -1,3 +1,4 @@
+//Para testar cadastre o numero +14155238886 no seu whatsApp e mande a mensagem "join remain-fruit"
 {
   "description": "A New Flow",
   "states": [
